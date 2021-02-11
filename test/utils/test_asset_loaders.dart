@@ -35,7 +35,8 @@ class JsonAssetLoader extends AssetLoader {
           }
         }
       },
-      'path': '$fullPath'
+      'path': '$fullPath',
+      'test_missing_fallback': (locale.languageCode == 'fb' ? 'fallback!' : null),
     });
   }
 

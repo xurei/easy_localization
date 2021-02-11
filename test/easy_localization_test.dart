@@ -51,8 +51,13 @@ void main() {
           Localization.load(Locale('en'), translations: r1.translations), true);
     });
 
+    test('load() with fallback succeeds', () async {
+      expect(
+          Localization.load(Locale('en'), translations: r1.translations, fallbackTranslations: r2.translations), true);
+    });
+
     test('localeFromString() succeeds', () async {
-      
+
       expect(Locale('ar'),localeFromString('ar'));
       expect(Locale('ar','DZ'),localeFromString('ar_DZ'));
       expect(Locale.fromSubtags(languageCode:'ar' ,scriptCode:'Arab' , countryCode:'DZ' ),localeFromString('ar_Arab_DZ'));
@@ -87,12 +92,13 @@ void main() {
     group('tr', () {
       var r = Resource(
           locale: Locale('en'),
+          fallbackLocale: Locale('fb'),
           path: 'path',
           useOnlyLangCode: true,
           assetLoader: JsonAssetLoader());
       setUpAll(() async {
         await r.loadTranslations();
-        Localization.load(Locale('en'), translations: r.translations);
+        Localization.load(Locale('en'), translations: r.translations, fallbackTranslations: r.fallbackTranslations);
       });
       test('finds and returns resource', () {
         expect(Localization.instance.tr('test'), 'test');
@@ -118,8 +124,20 @@ void main() {
       test('reports missing resource', overridePrint(() {
         printLog = [];
         expect(Localization.instance.tr('test_missing'), 'test_missing');
-        expect(printLog.first,
+        final logIterator = printLog.iterator;
+        logIterator.moveNext();
+        expect(logIterator.current,
             '\u001B[34m[WARNING] Easy Localization: Localization key [test_missing] not found\u001b[0m');
+        logIterator.moveNext();
+        expect(logIterator.current,
+            '\u001B[34m[WARNING] Easy Localization: Fallback localization key [test_missing] not found\u001b[0m');
+      }));
+
+      test('uses fallback translations', overridePrint(() {
+        printLog = [];
+        expect(Localization.instance.tr('test_missing_fallback'), 'fallback!');
+        /*expect(printLog.first,
+            '\u001B[34m[WARNING] Easy Localization: Localization key [test_missing] not found\u001b[0m');*/
       }));
 
       test('returns resource and replaces argument', () {

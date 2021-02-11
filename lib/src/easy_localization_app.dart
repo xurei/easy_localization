@@ -155,6 +155,7 @@ class _EasyLocalizationState extends State<EasyLocalization> {
 
     bloc.onChange(Resource(
         locale: locale,
+        fallbackLocale: widget.fallbackLocale,
         assetLoader: widget.assetLoader,
         path: widget.path,
         useOnlyLangCode: widget.useOnlyLangCode));
@@ -214,6 +215,7 @@ class _EasyLocalizationState extends State<EasyLocalization> {
                 snapshot.data.locale,
                 bloc: bloc,
                 delegate: _EasyLocalizationDelegate(
+                    fallbackTranslations: snapshot.data.fallbackTranslations,
                     translations: snapshot.data.translations,
                     supportedLocales: widget.supportedLocales),
               );
@@ -277,6 +279,7 @@ class _EasyLocalizationProvider extends InheritedWidget {
 
       bloc.onChange(Resource(
           locale: locale,
+          fallbackLocale: fallbackLocale,
           path: parent.path,
           assetLoader: parent.assetLoader,
           useOnlyLangCode: parent.useOnlyLangCode));
@@ -308,13 +311,15 @@ class _EasyLocalizationProvider extends InheritedWidget {
 class _EasyLocalizationDelegate extends LocalizationsDelegate<Localization> {
   final List<Locale> supportedLocales;
   final Translations translations;
+  final Translations fallbackTranslations;
 
   ///  * use only the lang code to generate i18n file path like en.json or ar.json
   // final bool useOnlyLangCode;
 
-  _EasyLocalizationDelegate({this.translations, this.supportedLocales}) {
+  _EasyLocalizationDelegate({this.translations, this.fallbackTranslations, this.supportedLocales}) {
     log('Init Localization Delegate', name: 'Easy Localization');
     Localization.instance.translations = translations;
+    Localization.instance.fallbackTranslations = fallbackTranslations;
   }
 
   @override
@@ -323,7 +328,7 @@ class _EasyLocalizationDelegate extends LocalizationsDelegate<Localization> {
   @override
   Future<Localization> load(Locale value) {
     log('Load Localization Delegate', name: 'Easy Localization');
-    Localization.load(value, translations: translations);
+    Localization.load(value, translations: translations, fallbackTranslations: fallbackTranslations);
     return Future.value(Localization.instance);
   }
 
