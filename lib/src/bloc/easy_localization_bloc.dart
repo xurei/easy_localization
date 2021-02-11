@@ -1,13 +1,14 @@
 part of '../easy_localization_app.dart';
 
 class Resource {
-  final Locale locale;
+  final Locale locale, fallbackLocale;
   final assetLoader;
   final String path;
   final bool useOnlyLangCode;
-  Translations _translations;
+  Translations _translations, _fallbackTranslations;
   Translations get translations => _translations;
-  Resource({this.locale, this.assetLoader, this.path, this.useOnlyLangCode});
+  Translations get fallbackTranslations => _fallbackTranslations;
+  Resource({this.locale, this.fallbackLocale, this.assetLoader, this.path, this.useOnlyLangCode});
 
   Future loadTranslations() async {
     Map<String, dynamic> data;
@@ -15,6 +16,13 @@ class Resource {
         ? data = await assetLoader.load(path, Locale(locale.languageCode))
         : data = await assetLoader.load(path, locale);
     _translations = Translations(data);
+
+    if (fallbackLocale != null) {
+      useOnlyLangCode
+          ? data = await assetLoader.load(path, Locale(fallbackLocale.languageCode))
+          : data = await assetLoader.load(path, fallbackLocale);
+      _fallbackTranslations = Translations(data);
+    }
   }
 }
 
